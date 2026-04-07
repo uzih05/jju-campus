@@ -27,7 +27,6 @@ import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.OutlinedTextField
@@ -46,9 +45,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -64,21 +61,55 @@ val CLASS_COLORS = listOf(
 
 val DAYS = listOf("월", "화", "수", "목", "금")
 
-// 교시 정의: 1교시=09:00~09:50, 2교시=10:00~10:50, ...
-private const val FIRST_HOUR = 9
-private const val TOTAL_PERIODS = 13
+// 전주대 교시 체계: 주1~주18 (09:00~18:00, 30분), 야1~야10 (18:00~23:00, 30분)
+private data class Period(val label: String, val index: Int, val startH: Int, val startM: Int, val endH: Int, val endM: Int)
 
-private fun periodStartHour(period: Int) = FIRST_HOUR + period - 1
-private fun hourToPeriod(hour: Int) = (hour - FIRST_HOUR + 1).coerceIn(1, TOTAL_PERIODS)
-private fun periodLabel(period: Int): String {
-    val h = periodStartHour(period)
-    return "${period}교시 (%02d:00)".format(h)
+private val ALL_PERIODS: List<Period> = buildList {
+    // 주1~주18: 09:00 base, 30min each
+    for (n in 1..18) {
+        val sh = 9 + (n - 1) / 2
+        val sm = ((n - 1) % 2) * 30
+        val eh = 9 + n / 2
+        val em = (n % 2) * 30
+        add(Period("주$n", size, sh, sm, eh, em))
+    }
+    // 야1~야10: 18:00 base, 30min each
+    for (n in 1..10) {
+        val sh = 18 + (n - 1) / 2
+        val sm = ((n - 1) % 2) * 30
+        val eh = 18 + n / 2
+        val em = (n % 2) * 30
+        add(Period("야$n", size, sh, sm, eh, em))
+    }
 }
-private fun periodRangeLabel(startPeriod: Int, endPeriod: Int): String {
-    val sh = periodStartHour(startPeriod)
-    val eh = periodStartHour(endPeriod)
-    return if (startPeriod == endPeriod) "${startPeriod}교시 (%02d:00~%02d:50)".format(sh, eh)
-    else "${startPeriod}~${endPeriod}교시 (%02d:00~%02d:50)".format(sh, eh)
+
+// Grid: 09:00~23:00 = 14 hours, 30dp per 30min slot = 60dp/hour
+private const val GRID_START_HOUR = 9
+private const val GRID_END_HOUR = 23
+private const val DP_PER_SLOT = 30 // 30dp per 30-minute slot
+private const val TOTAL_SLOTS = (GRID_END_HOUR - GRID_START_HOUR) * 2 // 28 slots
+
+private fun timeToOffset(hour: Int, minute: Int): Int {
+    val totalMin = (hour - GRID_START_HOUR) * 60 + minute
+    return (totalMin * DP_PER_SLOT / 30).coerceAtLeast(0)
+}
+
+private fun periodDropdownLabel(p: Period): String {
+    return "${p.label} (%02d:%02d)".format(p.startH, p.startM)
+}
+
+private fun findPeriodByTime(hour: Int, minute: Int): Period? {
+    return ALL_PERIODS.firstOrNull { it.startH == hour && it.startM == minute }
+}
+
+private fun periodRangeText(startH: Int, startM: Int, endH: Int, endM: Int): String {
+    val sp = findPeriodByTime(startH, startM)
+    // end period: find the period whose END matches
+    val ep = ALL_PERIODS.lastOrNull { it.endH == endH && it.endM == endM }
+    val pLabel = if (sp != null && ep != null) {
+        if (sp.label == ep.label) sp.label else "${sp.label}~${ep.label}"
+    } else ""
+    return "$pLabel (%02d:%02d~%02d:%02d)".format(startH, startM, endH, endM)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -111,19 +142,35 @@ fun TimetableScreen(viewModel: TimetableViewModel = viewModel()) {
                 modifier = Modifier
                     .fillMaxSize()
                     .verticalScroll(rememberScrollState())
-                    .padding(horizontal = 8.dp),
+                    .padding(horizontal = 4.dp),
             ) {
-                // Period labels
-                Column(modifier = Modifier.width(32.dp)) {
+                // Period labels (show every hour + 주/야 boundary labels)
+                Column(modifier = Modifier.width(36.dp)) {
                     Spacer(Modifier.height(28.dp)) // header
-                    for (period in 1..TOTAL_PERIODS) {
-                        Box(modifier = Modifier.height(48.dp), contentAlignment = Alignment.TopEnd) {
-                            Text(
-                                "$period",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.padding(end = 4.dp),
-                            )
+                    for (slot in 0 until TOTAL_SLOTS) {
+                        val hour = GRID_START_HOUR + slot / 2
+                        val isHour = slot % 2 == 0
+                        Box(modifier = Modifier.height(DP_PER_SLOT.dp), contentAlignment = Alignment.TopEnd) {
+                            if (isHour) {
+                                val periodLabel = when {
+                                    hour < 18 -> "주${(hour - 9) * 2 + 1}"
+                                    else -> "야${(hour - 18) * 2 + 1}"
+                                }
+                                Column(horizontalAlignment = Alignment.End, modifier = Modifier.padding(end = 2.dp)) {
+                                    Text(
+                                        "%02d".format(hour),
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        fontSize = 9.sp,
+                                    )
+                                    Text(
+                                        periodLabel,
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = MaterialTheme.colorScheme.primary,
+                                        fontSize = 8.sp,
+                                    )
+                                }
+                            }
                         }
                     }
                 }
@@ -144,33 +191,38 @@ fun TimetableScreen(viewModel: TimetableViewModel = viewModel()) {
                         }
 
                         // Time slots
-                        Box(modifier = Modifier.fillMaxWidth().height((48 * 13).dp)) {
-                            // Grid lines
-                            for (hour in 9..21) {
+                        Box(modifier = Modifier.fillMaxWidth().height((DP_PER_SLOT * TOTAL_SLOTS).dp)) {
+                            // Grid lines (every hour)
+                            for (h in GRID_START_HOUR..GRID_END_HOUR) {
+                                val y = timeToOffset(h, 0)
+                                val alpha = if (h == 18) 0.5f else 0.2f // 주/야 경계 강조
                                 Box(
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .height(0.5.dp)
-                                        .offset(y = ((hour - 9) * 48).dp)
-                                        .background(MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.2f)),
+                                        .offset(y = y.dp)
+                                        .background(MaterialTheme.colorScheme.outlineVariant.copy(alpha = alpha)),
                                 )
                             }
 
-                            // Class blocks (clamp to valid range)
+                            // Class blocks
                             entries.filter { it.dayOfWeek == dayIndex }.forEach { entry ->
-                                val clampedStartH = entry.startHour.coerceIn(FIRST_HOUR, FIRST_HOUR + TOTAL_PERIODS - 1)
-                                val clampedStartM = entry.startMinute.coerceIn(0, 59)
-                                val clampedEndH = entry.endHour.coerceIn(clampedStartH, FIRST_HOUR + TOTAL_PERIODS)
-                                val clampedEndM = entry.endMinute.coerceIn(0, 59)
-                                val topOffset = ((clampedStartH - FIRST_HOUR) * 48 + clampedStartM * 48 / 60).dp
-                                val blockHeight = ((clampedEndH - clampedStartH) * 48 + (clampedEndM - clampedStartM) * 48 / 60).coerceAtLeast(24).dp
+                                val startOff = timeToOffset(
+                                    entry.startHour.coerceIn(GRID_START_HOUR, GRID_END_HOUR),
+                                    entry.startMinute.coerceIn(0, 59),
+                                )
+                                val endOff = timeToOffset(
+                                    entry.endHour.coerceIn(GRID_START_HOUR, GRID_END_HOUR),
+                                    entry.endMinute.coerceIn(0, 59),
+                                )
+                                val blockHeight = (endOff - startOff).coerceAtLeast(DP_PER_SLOT / 2)
                                 val color = CLASS_COLORS[entry.color % CLASS_COLORS.size]
 
                                 Box(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .height(blockHeight)
-                                        .offset(y = topOffset)
+                                        .height(blockHeight.dp)
+                                        .offset(y = startOff.dp)
                                         .padding(1.dp)
                                         .clip(RoundedCornerShape(6.dp))
                                         .background(color.copy(alpha = 0.85f))
@@ -219,21 +271,20 @@ fun TimetableScreen(viewModel: TimetableViewModel = viewModel()) {
 
     // Detail/delete dialog
     if (selectedEntry != null) {
+        val e = selectedEntry!!
         AlertDialog(
             onDismissRequest = { selectedEntry = null },
-            title = { Text(selectedEntry!!.name) },
+            title = { Text(e.name) },
             text = {
                 Column {
-                    if (selectedEntry!!.professor.isNotEmpty()) Text("교수: ${selectedEntry!!.professor}")
-                    if (selectedEntry!!.room.isNotEmpty()) Text("강의실: ${selectedEntry!!.room}")
-                    val sp = hourToPeriod(selectedEntry!!.startHour)
-                    val ep = hourToPeriod(selectedEntry!!.endHour)
-                    Text("${DAYS[selectedEntry!!.dayOfWeek.coerceIn(0, 4)]} ${periodRangeLabel(sp, ep)}")
+                    if (e.professor.isNotEmpty()) Text("교수: ${e.professor}")
+                    if (e.room.isNotEmpty()) Text("강의실: ${e.room}")
+                    Text("${DAYS[e.dayOfWeek.coerceIn(0, 4)]} ${periodRangeText(e.startHour, e.startMinute, e.endHour, e.endMinute)}")
                 }
             },
             confirmButton = {
                 TextButton(onClick = {
-                    scope.launch { viewModel.remove(selectedEntry!!) }
+                    scope.launch { viewModel.remove(e) }
                     selectedEntry = null
                 }) {
                     Icon(Icons.Default.Delete, contentDescription = null, tint = MaterialTheme.colorScheme.error)
@@ -255,8 +306,8 @@ private fun AddClassDialog(existingCount: Int, onDismiss: () -> Unit, onAdd: (Ti
     var professor by remember { mutableStateOf("") }
     var room by remember { mutableStateOf("") }
     var dayOfWeek by remember { mutableIntStateOf(0) }
-    var startPeriod by remember { mutableIntStateOf(1) }
-    var endPeriod by remember { mutableIntStateOf(1) }
+    var startIndex by remember { mutableIntStateOf(0) }
+    var endIndex by remember { mutableIntStateOf(0) }
     var dayExpanded by remember { mutableStateOf(false) }
     var startExpanded by remember { mutableStateOf(false) }
     var endExpanded by remember { mutableStateOf(false) }
@@ -296,7 +347,7 @@ private fun AddClassDialog(existingCount: Int, onDismiss: () -> Unit, onAdd: (Ti
                         modifier = Modifier.weight(1f),
                     ) {
                         OutlinedTextField(
-                            value = "${startPeriod}교시",
+                            value = ALL_PERIODS[startIndex].label,
                             onValueChange = {},
                             readOnly = true,
                             label = { Text("시작") },
@@ -304,12 +355,12 @@ private fun AddClassDialog(existingCount: Int, onDismiss: () -> Unit, onAdd: (Ti
                             modifier = Modifier.fillMaxWidth().menuAnchor(MenuAnchorType.PrimaryNotEditable),
                         )
                         ExposedDropdownMenu(expanded = startExpanded, onDismissRequest = { startExpanded = false }) {
-                            for (p in 1..TOTAL_PERIODS) {
+                            ALL_PERIODS.forEachIndexed { i, p ->
                                 DropdownMenuItem(
-                                    text = { Text(periodLabel(p)) },
+                                    text = { Text(periodDropdownLabel(p)) },
                                     onClick = {
-                                        startPeriod = p
-                                        if (endPeriod < p) endPeriod = p
+                                        startIndex = i
+                                        if (endIndex < i) endIndex = i
                                         startExpanded = false
                                     },
                                 )
@@ -324,7 +375,7 @@ private fun AddClassDialog(existingCount: Int, onDismiss: () -> Unit, onAdd: (Ti
                         modifier = Modifier.weight(1f),
                     ) {
                         OutlinedTextField(
-                            value = "${endPeriod}교시",
+                            value = ALL_PERIODS[endIndex].label,
                             onValueChange = {},
                             readOnly = true,
                             label = { Text("종료") },
@@ -332,10 +383,11 @@ private fun AddClassDialog(existingCount: Int, onDismiss: () -> Unit, onAdd: (Ti
                             modifier = Modifier.fillMaxWidth().menuAnchor(MenuAnchorType.PrimaryNotEditable),
                         )
                         ExposedDropdownMenu(expanded = endExpanded, onDismissRequest = { endExpanded = false }) {
-                            for (p in startPeriod..TOTAL_PERIODS) {
+                            for (i in startIndex until ALL_PERIODS.size) {
+                                val p = ALL_PERIODS[i]
                                 DropdownMenuItem(
-                                    text = { Text(periodLabel(p)) },
-                                    onClick = { endPeriod = p; endExpanded = false },
+                                    text = { Text(periodDropdownLabel(p)) },
+                                    onClick = { endIndex = i; endExpanded = false },
                                 )
                             }
                         }
@@ -347,11 +399,13 @@ private fun AddClassDialog(existingCount: Int, onDismiss: () -> Unit, onAdd: (Ti
             TextButton(
                 onClick = {
                     if (name.isNotBlank()) {
+                        val sp = ALL_PERIODS[startIndex]
+                        val ep = ALL_PERIODS[endIndex]
                         onAdd(TimetableEntry(
                             name = name, professor = professor, room = room,
                             dayOfWeek = dayOfWeek,
-                            startHour = periodStartHour(startPeriod), startMinute = 0,
-                            endHour = periodStartHour(endPeriod), endMinute = 50,
+                            startHour = sp.startH, startMinute = sp.startM,
+                            endHour = ep.endH, endMinute = ep.endM,
                             color = existingCount % CLASS_COLORS.size,
                         ))
                     }
