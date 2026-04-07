@@ -1,6 +1,7 @@
 package com.example.galaxy.ui.screen.library
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -65,7 +66,15 @@ fun LibraryScreen(viewModel: LibraryViewModel = viewModel()) {
         when {
             state.isLoading -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
             state.error != null -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text(state.error!!, color = MaterialTheme.colorScheme.error)
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(state.error!!, color = MaterialTheme.colorScheme.error)
+                    Spacer(Modifier.height(12.dp))
+                    Text(
+                        "다시 시도",
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.clickable { viewModel.load() },
+                    )
+                }
             }
             else -> LazyColumn(
                 contentPadding = PaddingValues(bottom = 16.dp),
