@@ -70,7 +70,7 @@ fun SettingsScreen(navController: NavController) {
     Column(
         modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(20.dp),
     ) {
-        Text("설정", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
+        Text("설정", style = MaterialTheme.typography.headlineMedium)
 
         Spacer(Modifier.height(24.dp))
 
@@ -95,7 +95,7 @@ fun SettingsScreen(navController: NavController) {
             }
         }
 
-        Spacer(Modifier.height(16.dp))
+        Spacer(Modifier.height(24.dp))
 
         SectionTitle("정보")
         SettingsCard {
@@ -106,7 +106,7 @@ fun SettingsScreen(navController: NavController) {
             SettingsItem(Icons.Default.Info, "오픈소스 라이선스", "Jsoup, Retrofit, Room 등") {}
         }
 
-        Spacer(Modifier.height(16.dp))
+        Spacer(Modifier.height(24.dp))
 
         SectionTitle("데이터")
         SettingsCard {
@@ -144,7 +144,7 @@ private fun SettingsCard(content: @Composable () -> Unit) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
-        elevation = CardDefaults.cardElevation(0.5.dp),
+        elevation = CardDefaults.cardElevation(0.dp),
     ) {
         Column { content() }
     }
