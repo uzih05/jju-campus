@@ -55,11 +55,11 @@ fun MealScreen(viewModel: MealViewModel = viewModel()) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = 20.dp, end = 8.dp, top = 16.dp, bottom = 4.dp),
+                .padding(start = 20.dp, end = 8.dp, top = 16.dp, bottom = 8.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text("학식", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
+            Text("학식", style = MaterialTheme.typography.headlineMedium)
             IconButton(onClick = { viewModel.loadMeals() }) {
                 Icon(Icons.Default.Refresh, contentDescription = "새로고침")
             }
@@ -79,7 +79,7 @@ fun MealScreen(viewModel: MealViewModel = viewModel()) {
                         Spacer(Modifier.height(12.dp))
                         Text(
                             "다시 시도",
-                            color = MaterialTheme.colorScheme.primary,
+                            color = MaterialTheme.colorScheme.secondary,
                             modifier = Modifier.clickable { viewModel.loadMeals() },
                         )
                     }
@@ -93,7 +93,7 @@ fun MealScreen(viewModel: MealViewModel = viewModel()) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                        .padding(horizontal = 20.dp, vertical = 8.dp),
                     horizontalArrangement = Arrangement.SpaceEvenly,
                 ) {
                     state.weeklyMenus.forEachIndexed { index, menu ->
@@ -150,7 +150,7 @@ fun MealScreen(viewModel: MealViewModel = viewModel()) {
                     }
                 } else {
                     LazyColumn(
-                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                        contentPadding = PaddingValues(horizontal = 20.dp, vertical = 8.dp),
                         verticalArrangement = Arrangement.spacedBy(12.dp),
                     ) {
                         items(selectedMenu.meals) { meal ->
@@ -171,7 +171,7 @@ private fun MealCard(meal: Meal) {
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface,
         ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.5.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             // Meal type header
@@ -197,7 +197,7 @@ private fun MealCard(meal: Meal) {
                     Text(
                         text = meal.type,
                         style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
+                        fontWeight = FontWeight.SemiBold,
                     )
                     if (meal.time.isNotEmpty()) {
                         Text(

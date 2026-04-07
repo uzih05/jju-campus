@@ -123,11 +123,11 @@ fun ScheduleScreen(viewModel: ScheduleViewModel = viewModel()) {
 
     Column(modifier = Modifier.fillMaxSize()) {
         Row(
-            modifier = Modifier.fillMaxWidth().padding(start = 20.dp, end = 8.dp, top = 16.dp, bottom = 4.dp),
+            modifier = Modifier.fillMaxWidth().padding(start = 20.dp, end = 8.dp, top = 16.dp, bottom = 8.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text("학사일정", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
+            Text("학사일정", style = MaterialTheme.typography.headlineMedium)
             IconButton(onClick = { viewModel.refresh() }) {
                 Icon(Icons.Default.Refresh, contentDescription = "새로고침")
             }
@@ -141,7 +141,7 @@ fun ScheduleScreen(viewModel: ScheduleViewModel = viewModel()) {
                     Spacer(Modifier.height(12.dp))
                     Text(
                         "다시 시도",
-                        color = MaterialTheme.colorScheme.primary,
+                        color = MaterialTheme.colorScheme.secondary,
                         modifier = Modifier.clickable { viewModel.refresh() },
                     )
                 }
@@ -151,8 +151,8 @@ fun ScheduleScreen(viewModel: ScheduleViewModel = viewModel()) {
             }
             else -> {
                 LazyColumn(
-                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-                    verticalArrangement = Arrangement.spacedBy(10.dp),
+                    contentPadding = PaddingValues(horizontal = 20.dp, vertical = 8.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
                     items(state.ddays) { dday ->
                         DDayCard(dday)
@@ -171,7 +171,7 @@ private fun DDayCard(dday: DDay) {
 
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(14.dp),
+        shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
             containerColor = when {
                 isToday -> MaterialTheme.colorScheme.primaryContainer
@@ -179,7 +179,7 @@ private fun DDayCard(dday: DDay) {
                 else -> MaterialTheme.colorScheme.surface
             },
         ),
-        elevation = CardDefaults.cardElevation(if (isPast) 0.dp else 1.dp),
+        elevation = CardDefaults.cardElevation(0.dp),
     ) {
         Row(
             modifier = Modifier.padding(16.dp),

@@ -56,11 +56,11 @@ fun NoticesScreen(viewModel: NoticesViewModel = viewModel()) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = 20.dp, end = 8.dp, top = 16.dp, bottom = 4.dp),
+                .padding(start = 20.dp, end = 8.dp, top = 16.dp, bottom = 8.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text("공지사항", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
+            Text("공지사항", style = MaterialTheme.typography.headlineMedium)
             IconButton(onClick = { viewModel.refresh() }) {
                 Icon(Icons.Default.Refresh, contentDescription = "새로고침")
             }
@@ -68,7 +68,7 @@ fun NoticesScreen(viewModel: NoticesViewModel = viewModel()) {
 
         // Category chips
         LazyRow(
-            contentPadding = PaddingValues(horizontal = 16.dp),
+            contentPadding = PaddingValues(horizontal = 20.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             items(NoticeCategory.entries.toList()) { category ->
@@ -101,7 +101,7 @@ fun NoticesScreen(viewModel: NoticesViewModel = viewModel()) {
                         Spacer(Modifier.height(12.dp))
                         Text(
                             "다시 시도",
-                            color = MaterialTheme.colorScheme.primary,
+                            color = MaterialTheme.colorScheme.secondary,
                             modifier = Modifier.clickable { viewModel.refresh() },
                         )
                     }
@@ -116,8 +116,8 @@ fun NoticesScreen(viewModel: NoticesViewModel = viewModel()) {
 
             else -> {
                 LazyColumn(
-                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    contentPadding = PaddingValues(horizontal = 20.dp, vertical = 8.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
                     items(uiState.notices, key = { it.id }) { notice ->
                         NoticeItem(
@@ -140,13 +140,13 @@ private fun NoticeItem(notice: Notice, onClick: () -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick),
-        shape = RoundedCornerShape(12.dp),
+        shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
             containerColor = if (notice.isPinned)
                 MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
             else MaterialTheme.colorScheme.surface,
         ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.5.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
     ) {
         Row(
             modifier = Modifier.padding(16.dp),

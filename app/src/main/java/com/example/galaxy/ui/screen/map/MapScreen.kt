@@ -55,13 +55,13 @@ fun MapScreen() {
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text("캠퍼스", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
+            Text("캠퍼스", style = MaterialTheme.typography.headlineMedium)
             IconButton(onClick = { info = detector.detect() }) {
                 Icon(Icons.Default.Refresh, contentDescription = "새로고침")
             }
         }
 
-        Spacer(Modifier.height(16.dp))
+        Spacer(Modifier.height(24.dp))
 
         // Campus status card
         Card(
@@ -92,7 +92,6 @@ fun MapScreen() {
                     Text(
                         if (info.isOnCampus) "교내 접속 중" else "교외 네트워크",
                         style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
                     )
                     if (info.isOnCampus) {
                         Text(
@@ -104,16 +103,16 @@ fun MapScreen() {
             }
         }
 
-        Spacer(Modifier.height(16.dp))
+        Spacer(Modifier.height(24.dp))
 
         // Network details
-        Text("네트워크 정보", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
-        Spacer(Modifier.height(8.dp))
+        Text("네트워크 정보", style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.primary)
+        Spacer(Modifier.height(12.dp))
 
         Card(
             modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(12.dp),
-            elevation = CardDefaults.cardElevation(0.5.dp),
+            shape = RoundedCornerShape(16.dp),
+            elevation = CardDefaults.cardElevation(0.dp),
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
                 InfoRow("IP 주소", info.ipAddress ?: "알 수 없음")
@@ -125,11 +124,11 @@ fun MapScreen() {
         Spacer(Modifier.height(24.dp))
 
         // Building mapping guide
-        Text("건물 매핑", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
-        Spacer(Modifier.height(8.dp))
+        Text("건물 매핑", style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.primary)
+        Spacer(Modifier.height(12.dp))
         Card(
             modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(12.dp),
+            shape = RoundedCornerShape(16.dp),
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
