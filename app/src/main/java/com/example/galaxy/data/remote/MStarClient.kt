@@ -1,6 +1,7 @@
 package com.example.galaxy.data.remote
 
 import android.content.Context
+import com.example.galaxy.BuildConfig
 import com.example.galaxy.data.remote.api.MStarApi
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
@@ -24,7 +25,8 @@ object MStarClient {
 
     val api: MStarApi by lazy {
         val logging = HttpLoggingInterceptor().apply {
-            level = HttpLoggingInterceptor.Level.BODY
+            level = if (BuildConfig.DEBUG) HttpLoggingInterceptor.Level.BODY
+                    else HttpLoggingInterceptor.Level.NONE
         }
 
         val client = OkHttpClient.Builder()
