@@ -15,6 +15,7 @@ import java.time.LocalDate
 import java.time.YearMonth
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,7 +25,6 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -33,10 +33,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.DinnerDining
+import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.EventSeat
-import androidx.compose.material.icons.filled.FreeBreakfast
-import androidx.compose.material.icons.filled.LunchDining
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PushPin
@@ -46,7 +44,6 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -54,7 +51,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -70,6 +66,7 @@ import coil3.request.crossfade
 import androidx.compose.ui.layout.ContentScale
 
 private val CardShape = RoundedCornerShape(16.dp)
+private val CardBorder @Composable get() = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
 
 @Composable
 fun DashboardScreen(viewModel: DashboardViewModel = viewModel()) {
@@ -83,7 +80,7 @@ fun DashboardScreen(viewModel: DashboardViewModel = viewModel()) {
     Column(
         modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()),
     ) {
-        // ── Header banner ──
+        // ━━ Header banner ━━
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -95,7 +92,7 @@ fun DashboardScreen(viewModel: DashboardViewModel = viewModel()) {
                         ),
                     ),
                 )
-                .padding(horizontal = 20.dp, vertical = 24.dp),
+                .padding(horizontal = 20.dp, vertical = 28.dp),
         ) {
             if (state.userName != null) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -105,8 +102,8 @@ fun DashboardScreen(viewModel: DashboardViewModel = viewModel()) {
                             .crossfade(true)
                             .build(),
                         contentDescription = "프로필",
-                        modifier = Modifier.size(60.dp).clip(CircleShape)
-                            .border(2.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.3f), CircleShape)
+                        modifier = Modifier.size(64.dp).clip(CircleShape)
+                            .border(2.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.4f), CircleShape)
                             .background(MaterialTheme.colorScheme.surfaceVariant, CircleShape),
                         contentScale = ContentScale.Crop,
                         loading = {
@@ -134,199 +131,209 @@ fun DashboardScreen(viewModel: DashboardViewModel = viewModel()) {
             } else {
                 Column {
                     Text("Galaxy", style = MaterialTheme.typography.headlineLarge)
+                    Spacer(Modifier.height(2.dp))
                     Text("전주대학교 캠퍼스", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
         }
 
-        Column(modifier = Modifier.padding(horizontal = 20.dp)) {
-            // ── D-day cards ──
+        // ━━ Bento grid content ━━
+        Column(
+            modifier = Modifier.padding(horizontal = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            Spacer(Modifier.height(4.dp))
+
             var showCalendarPopup by remember { mutableStateOf(false) }
 
+            // Row 1: D-day (big) + Library seats (small)
             if (state.nextEvents.isNotEmpty()) {
-                Spacer(Modifier.height(16.dp))
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                ) {
-                    state.nextEvents.forEach { event ->
-                        val isSoon = event.daysLeft <= 7
-                        Card(
-                            modifier = Modifier.weight(1f).aspectRatio(1f).clickable { showCalendarPopup = true },
-                            shape = CardShape,
-                            colors = CardDefaults.cardColors(
-                                containerColor = if (isSoon) MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.4f)
-                                else MaterialTheme.colorScheme.surface,
-                            ),
-                            elevation = CardDefaults.cardElevation(0.dp),
-                            border = androidx.compose.foundation.BorderStroke(
-                                0.5.dp,
-                                MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
-                            ),
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    // Big D-day card — first event
+                    val mainEvent = state.nextEvents.first()
+                    val isSoon = mainEvent.daysLeft <= 7
+                    Card(
+                        modifier = Modifier.weight(1.4f).aspectRatio(0.95f).clickable { showCalendarPopup = true },
+                        shape = CardShape,
+                        colors = CardDefaults.cardColors(
+                            containerColor = if (isSoon) MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f)
+                            else MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f),
+                        ),
+                        elevation = CardDefaults.cardElevation(0.dp),
+                        border = CardBorder,
+                    ) {
+                        Column(
+                            modifier = Modifier.fillMaxSize().padding(16.dp),
+                            verticalArrangement = Arrangement.SpaceBetween,
                         ) {
-                            Column(
-                                modifier = Modifier.fillMaxSize().padding(12.dp),
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                verticalArrangement = Arrangement.Center,
-                            ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(Icons.Default.CalendarMonth, contentDescription = null, modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                                Spacer(Modifier.width(6.dp))
+                                Text("다음 일정", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            }
+                            Column {
                                 Text(
-                                    text = if (event.daysLeft == 0L) "TODAY" else "D-${event.daysLeft}",
-                                    fontSize = 28.sp,
+                                    text = if (mainEvent.daysLeft == 0L) "TODAY" else "D-${mainEvent.daysLeft}",
+                                    fontSize = 36.sp,
                                     fontWeight = FontWeight.ExtraBold,
                                     color = if (isSoon) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
                                 )
-                                Spacer(Modifier.height(6.dp))
-                                Text(event.label, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold, textAlign = TextAlign.Center, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                                Spacer(Modifier.height(2.dp))
-                                Text(event.dateStr, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                Spacer(Modifier.height(4.dp))
+                                Text(mainEvent.label, style = MaterialTheme.typography.titleSmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                                Text(mainEvent.dateStr, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            }
+                        }
+                    }
+
+                    // Right column: small D-day cards stacked
+                    if (state.nextEvents.size > 1) {
+                        Column(
+                            modifier = Modifier.weight(1f),
+                            verticalArrangement = Arrangement.spacedBy(12.dp),
+                        ) {
+                            state.nextEvents.drop(1).take(2).forEach { event ->
+                                val soon = event.daysLeft <= 7
+                                Card(
+                                    modifier = Modifier.fillMaxWidth().clickable { showCalendarPopup = true },
+                                    shape = CardShape,
+                                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                                    elevation = CardDefaults.cardElevation(0.dp),
+                                    border = CardBorder,
+                                ) {
+                                    Column(modifier = Modifier.padding(14.dp)) {
+                                        Text(
+                                            text = if (event.daysLeft == 0L) "TODAY" else "D-${event.daysLeft}",
+                                            fontSize = 22.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = if (soon) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
+                                        )
+                                        Spacer(Modifier.height(4.dp))
+                                        Text(event.label, style = MaterialTheme.typography.labelMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                                    }
+                                }
                             }
                         }
                     }
                 }
-                Spacer(Modifier.height(24.dp))
             }
 
             if (showCalendarPopup) {
                 CalendarPopup(events = state.allEvents, onDismiss = { showCalendarPopup = false })
             }
 
-            // ── Library seats ──
-            if (state.topRooms.isNotEmpty()) {
-                SectionHeader(Icons.Default.EventSeat, "도서관 좌석", "실시간")
-                Spacer(Modifier.height(12.dp))
-                Card(
-                    shape = CardShape,
-                    elevation = CardDefaults.cardElevation(0.dp),
-                    border = androidx.compose.foundation.BorderStroke(0.5.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
-                ) {
-                    Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                        state.topRooms.forEach { room -> MiniSeatRow(room) }
+            // Row 2: Library seats + Meal summary side by side
+            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                // Library seats mini card
+                if (state.topRooms.isNotEmpty()) {
+                    Card(
+                        modifier = Modifier.weight(1f),
+                        shape = CardShape,
+                        elevation = CardDefaults.cardElevation(0.dp),
+                        border = CardBorder,
+                    ) {
+                        Column(modifier = Modifier.padding(16.dp)) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(Icons.Default.EventSeat, contentDescription = null, modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.primary)
+                                Spacer(Modifier.width(6.dp))
+                                Text("도서관 좌석", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            }
+                            Spacer(Modifier.height(12.dp))
+                            state.topRooms.take(3).forEach { room ->
+                                val rate = if (room.activeTotal > 0) room.occupied.toFloat() / room.activeTotal else 0f
+                                val color = when {
+                                    rate > 0.9f -> MaterialTheme.colorScheme.error
+                                    rate > 0.7f -> MaterialTheme.colorScheme.secondary
+                                    else -> MaterialTheme.colorScheme.primary
+                                }
+                                Row(
+                                    modifier = Modifier.padding(vertical = 3.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                ) {
+                                    Text(room.name, style = MaterialTheme.typography.labelSmall, modifier = Modifier.weight(1f), maxLines = 1, overflow = TextOverflow.Ellipsis)
+                                    Text("${room.available}", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = color)
+                                }
+                            }
+                        }
                     }
                 }
-                Spacer(Modifier.height(24.dp))
-            }
 
-            // ── Today's meal ──
-            SectionHeader(Icons.Default.Restaurant, "오늘의 학식", state.todayDate)
-            Spacer(Modifier.height(12.dp))
-
-            if (state.todayMeals.isEmpty()) {
-                Text("등록된 식단이 없습니다", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            } else {
-                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    state.todayMeals.forEach { meal -> MiniMealCard(meal) }
-                }
-            }
-
-            Spacer(Modifier.height(24.dp))
-
-            // ── Recent notices ──
-            val context = LocalContext.current
-            SectionHeader(Icons.Default.Notifications, "최근 공지", "일반")
-            Spacer(Modifier.height(12.dp))
-
-            if (state.recentNotices.isNotEmpty()) {
+                // Meal summary mini card
                 Card(
+                    modifier = Modifier.weight(1f),
                     shape = CardShape,
                     elevation = CardDefaults.cardElevation(0.dp),
-                    border = androidx.compose.foundation.BorderStroke(0.5.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
+                    border = CardBorder,
                 ) {
-                    Column {
-                        state.recentNotices.forEachIndexed { index, notice ->
-                            Row(
-                                modifier = Modifier.fillMaxWidth().clickable {
-                                    context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(notice.url)))
-                                }.padding(horizontal = 16.dp, vertical = 14.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                            ) {
-                                if (notice.isPinned) {
-                                    Icon(Icons.Default.PushPin, contentDescription = null, modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.secondary)
-                                    Spacer(Modifier.width(6.dp))
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(Icons.Default.Restaurant, contentDescription = null, modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.primary)
+                            Spacer(Modifier.width(6.dp))
+                            Text("오늘의 학식", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
+                        Spacer(Modifier.height(12.dp))
+                        if (state.todayMeals.isEmpty()) {
+                            Text("식단 없음", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        } else {
+                            state.todayMeals.take(3).forEach { meal ->
+                                Row(modifier = Modifier.padding(vertical = 3.dp)) {
+                                    Text(meal.type, style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.SemiBold, modifier = Modifier.width(36.dp))
+                                    Text(
+                                        meal.items.firstOrNull() ?: "",
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis,
+                                    )
                                 }
-                                Text(notice.title, style = MaterialTheme.typography.bodyMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                            }
-                            if (index < state.recentNotices.lastIndex) {
-                                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
                             }
                         }
                     }
                 }
             }
 
-            Spacer(Modifier.height(32.dp))
-        }
-    }
-}
-
-@Composable
-private fun SectionHeader(icon: ImageVector, title: String, subtitle: String) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
-        Spacer(Modifier.width(8.dp))
-        Text(title, style = MaterialTheme.typography.titleMedium)
-        Spacer(Modifier.width(8.dp))
-        Text(subtitle, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-    }
-}
-
-@Composable
-private fun MiniSeatRow(room: RoomStatus) {
-    val rate = if (room.activeTotal > 0) room.occupied.toFloat() / room.activeTotal else 0f
-    val color = when {
-        rate > 0.9f -> MaterialTheme.colorScheme.error
-        rate > 0.7f -> MaterialTheme.colorScheme.secondary
-        else -> MaterialTheme.colorScheme.primary
-    }
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        // Left accent dot
-        Box(modifier = Modifier.size(8.dp).clip(CircleShape).background(color))
-        Spacer(Modifier.width(10.dp))
-        Text(room.name, style = MaterialTheme.typography.bodySmall, modifier = Modifier.weight(1f))
-        Text(
-            "${room.available}",
-            fontSize = 20.sp,
-            fontWeight = FontWeight.Bold,
-            color = color,
-        )
-        Text("석", style = MaterialTheme.typography.bodySmall, color = color, modifier = Modifier.padding(start = 2.dp))
-        Spacer(Modifier.width(10.dp))
-        LinearProgressIndicator(
-            progress = { rate },
-            modifier = Modifier.width(56.dp).height(4.dp).clip(RoundedCornerShape(2.dp)),
-            color = color,
-            trackColor = color.copy(alpha = 0.12f),
-        )
-    }
-}
-
-@Composable
-private fun MiniMealCard(meal: Meal) {
-    Card(
-        shape = CardShape,
-        elevation = CardDefaults.cardElevation(0.dp),
-        border = androidx.compose.foundation.BorderStroke(0.5.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
-    ) {
-        Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.Top) {
-            // Left accent bar
-            Box(
-                modifier = Modifier
-                    .width(4.dp)
-                    .height(40.dp)
-                    .clip(RoundedCornerShape(2.dp))
-                    .background(MaterialTheme.colorScheme.primary),
-            )
-            Spacer(Modifier.width(12.dp))
-            Column {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(meal.type, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold)
-                    if (meal.time.isNotEmpty()) {
-                        Spacer(Modifier.width(8.dp))
-                        Text(meal.time, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            // Row 3: Recent notices — full width
+            val context = LocalContext.current
+            if (state.recentNotices.isNotEmpty()) {
+                Card(
+                    shape = CardShape,
+                    elevation = CardDefaults.cardElevation(0.dp),
+                    border = CardBorder,
+                ) {
+                    Column {
+                        Row(
+                            modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 14.dp, bottom = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Icon(Icons.Default.Notifications, contentDescription = null, modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.primary)
+                            Spacer(Modifier.width(6.dp))
+                            Text("최근 공지", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
+                        state.recentNotices.forEachIndexed { index, notice ->
+                            Row(
+                                modifier = Modifier.fillMaxWidth().clickable {
+                                    context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(notice.url)))
+                                }.padding(horizontal = 16.dp, vertical = 12.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                if (notice.isPinned) {
+                                    Icon(Icons.Default.PushPin, contentDescription = null, modifier = Modifier.size(13.dp), tint = MaterialTheme.colorScheme.secondary)
+                                    Spacer(Modifier.width(6.dp))
+                                }
+                                Text(notice.title, style = MaterialTheme.typography.bodySmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                            }
+                            if (index < state.recentNotices.lastIndex) {
+                                HorizontalDivider(
+                                    modifier = Modifier.padding(horizontal = 16.dp),
+                                    color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f),
+                                )
+                            }
+                        }
+                        Spacer(Modifier.height(4.dp))
                     }
                 }
-                Spacer(Modifier.height(6.dp))
-                Text(meal.items.joinToString("  ·  "), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
+
+            Spacer(Modifier.height(24.dp))
         }
     }
 }
@@ -342,9 +349,7 @@ private fun CalendarPopup(events: List<CalendarEvent>, onDismiss: () -> Unit) {
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = {
-            Text("${yearMonth.year}년 ${yearMonth.monthValue}월", style = MaterialTheme.typography.titleLarge)
-        },
+        title = { Text("${yearMonth.year}년 ${yearMonth.monthValue}월", style = MaterialTheme.typography.titleLarge) },
         text = {
             Column {
                 Row(modifier = Modifier.fillMaxWidth()) {

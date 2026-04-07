@@ -2,26 +2,26 @@ package com.example.galaxy.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// Primary — Coral
-val Coral90 = Color(0xFFFFDAD6)   // lightest — container (light)
-val Coral80 = Color(0xFFFFB4AB)   // dark theme primary
-val Coral60 = Color(0xFFFF8A80)   // lighter accent
-val Coral40 = Color(0xFFFF6B6B)   // light theme primary
-val Coral20 = Color(0xFFCC4444)   // pressed state
-val Coral10 = Color(0xFF410002)   // onPrimaryContainer (light)
+// Primary — JJ Blue
+val JJBlue90 = Color(0xFFD0EFFF)    // lightest container (light)
+val JJBlue80 = Color(0xFF80D5F5)    // dark theme primary
+val JJBlue60 = Color(0xFF00ABEB)    // light theme primary (공식 밝은 블루)
+val JJBlue40 = Color(0xFF0088CC)    // pressed
+val JJBlue20 = Color(0xFF00498A)    // 공식 딥 블루, dark container
+val JJBlue10 = Color(0xFF001D36)    // onPrimaryContainer (light)
 
-// Secondary — Teal/Mint
-val Teal90 = Color(0xFFB2F5EA)    // container (light)
-val Teal80 = Color(0xFF70EFDE)    // dark theme secondary
-val Teal40 = Color(0xFF14B8A6)    // light theme secondary
-val Teal10 = Color(0xFF002019)    // onSecondaryContainer (light)
+// Accent — JJ Gold
+val JJGold90 = Color(0xFFFFF3C4)    // container (light)
+val JJGold80 = Color(0xFFFFE680)    // dark theme accent
+val JJGold50 = Color(0xFFF7D300)    // 공식 골드
+val JJGold10 = Color(0xFF3D3400)    // onContainer
 
-// Error — stays red-toned but distinct from coral
-val Error80 = Color(0xFFFFB3B3)
+// Error
+val Error80 = Color(0xFFFFB4AB)
 val Error40 = Color(0xFFBA1A1A)
 
 // Neutral surfaces
 val SurfaceLight = Color(0xFFFAFAFA)
-val SurfaceDark = Color(0xFF121212)
-val SurfaceVariantLight = Color(0xFFF3F0F0)
-val SurfaceVariantDark = Color(0xFF2C2C2C)
+val SurfaceDark = Color(0xFF151515)
+val SurfaceVariantLight = Color(0xFFF0F2F5)
+val SurfaceVariantDark = Color(0xFF252525)
