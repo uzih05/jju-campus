@@ -3,6 +3,7 @@ package com.example.galaxy.ui.screen.timetable
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -225,7 +226,11 @@ fun TimetableScreen(viewModel: TimetableViewModel = viewModel()) {
                                         .offset(y = startOff.dp)
                                         .padding(1.dp)
                                         .clip(RoundedCornerShape(6.dp))
-                                        .background(color.copy(alpha = 0.85f))
+                                        .background(
+                                            Brush.verticalGradient(
+                                                listOf(color.copy(alpha = 0.9f), color.copy(alpha = 0.7f)),
+                                            ),
+                                        )
                                         .clickable { selectedEntry = entry }
                                         .padding(4.dp),
                                 ) {

@@ -2,21 +2,26 @@ package com.example.galaxy.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// Primary — Navy
-val Navy80 = Color(0xFFB8C4E0)
-val Navy60 = Color(0xFF7B8DB8)
-val Navy40 = Color(0xFF3D5A99)
-val Navy20 = Color(0xFF1E3A6E)
-val Navy10 = Color(0xFF0F1D3A)
+// Primary — Coral
+val Coral90 = Color(0xFFFFDAD6)   // lightest — container (light)
+val Coral80 = Color(0xFFFFB4AB)   // dark theme primary
+val Coral60 = Color(0xFFFF8A80)   // lighter accent
+val Coral40 = Color(0xFFFF6B6B)   // light theme primary
+val Coral20 = Color(0xFFCC4444)   // pressed state
+val Coral10 = Color(0xFF410002)   // onPrimaryContainer (light)
 
-// Secondary — Teal (links, badges, accents only)
-val Teal80 = Color(0xFFA0E8D8)
-val Teal40 = Color(0xFF14B8A6)
+// Secondary — Teal/Mint
+val Teal90 = Color(0xFFB2F5EA)    // container (light)
+val Teal80 = Color(0xFF70EFDE)    // dark theme secondary
+val Teal40 = Color(0xFF14B8A6)    // light theme secondary
+val Teal10 = Color(0xFF002019)    // onSecondaryContainer (light)
 
-// Error
-val Red80 = Color(0xFFFFB3B3)
-val Red40 = Color(0xFFEF4444)
+// Error — stays red-toned but distinct from coral
+val Error80 = Color(0xFFFFB3B3)
+val Error40 = Color(0xFFBA1A1A)
 
 // Neutral surfaces
-val Surface = Color(0xFFF7F8FA)
-val SurfaceDark = Color(0xFF111827)
+val SurfaceLight = Color(0xFFFAFAFA)
+val SurfaceDark = Color(0xFF121212)
+val SurfaceVariantLight = Color(0xFFF3F0F0)
+val SurfaceVariantDark = Color(0xFF2C2C2C)
