@@ -36,6 +36,7 @@ import androidx.compose.material.icons.filled.EventSeat
 import androidx.compose.material.icons.filled.FreeBreakfast
 import androidx.compose.material.icons.filled.LunchDining
 import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PushPin
 import androidx.compose.material.icons.filled.Restaurant
 import androidx.compose.material3.Card
@@ -61,7 +62,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.galaxy.data.model.Meal
 import com.example.galaxy.data.remote.api.RoomStatus
-import coil3.compose.AsyncImage
+import coil3.compose.SubcomposeAsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
 import androidx.compose.ui.draw.clip
@@ -82,7 +83,7 @@ fun DashboardScreen(viewModel: DashboardViewModel = viewModel()) {
         // Header with profile
         if (state.userName != null) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                AsyncImage(
+                SubcomposeAsyncImage(
                     model = ImageRequest.Builder(LocalContext.current)
                         .data("https://instar.jj.ac.kr/JSP/img_view_thumb.jsp?sabun=${state.userId ?: ""}")
                         .crossfade(true)
@@ -90,6 +91,16 @@ fun DashboardScreen(viewModel: DashboardViewModel = viewModel()) {
                     contentDescription = "프로필",
                     modifier = Modifier.size(56.dp).clip(CircleShape).background(MaterialTheme.colorScheme.surfaceVariant, CircleShape),
                     contentScale = ContentScale.Crop,
+                    loading = {
+                        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                            CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
+                        }
+                    },
+                    error = {
+                        Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surfaceVariant), contentAlignment = Alignment.Center) {
+                            Icon(Icons.Default.Person, contentDescription = null, modifier = Modifier.size(28.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
+                    },
                 )
                 Spacer(Modifier.width(14.dp))
                 Column {
