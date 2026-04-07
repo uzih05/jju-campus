@@ -44,6 +44,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.example.galaxy.data.local.GalaxyDatabase
+import com.example.galaxy.data.model.NoticeCategory
 import com.example.galaxy.data.repository.AuthRepository
 import com.example.galaxy.ui.navigation.Route
 import kotlinx.coroutines.launch
@@ -53,6 +55,7 @@ fun SettingsScreen(navController: NavController) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val authRepo = remember { AuthRepository(context) }
+    val db = remember { GalaxyDatabase.getInstance(context) }
 
     var isLoggedIn by remember { mutableStateOf(false) }
     var userName by remember { mutableStateOf<String?>(null) }
@@ -107,7 +110,16 @@ fun SettingsScreen(navController: NavController) {
 
         SectionTitle("데이터")
         SettingsCard {
-            SettingsItem(Icons.Default.Delete, "캐시 삭제", "학식, 공지 캐시 초기화") {}
+            SettingsItem(Icons.Default.Delete, "캐시 삭제", "학식, 공지 캐시 초기화") {
+                scope.launch {
+                    db.mealDao().deleteAll()
+                    NoticeCategory.entries.forEach { db.noticeDao().deleteByCategory(it.name) }
+                }
+            }
+            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
+            SettingsItem(Icons.Default.Delete, "시간표 초기화", "저장된 시간표 전체 삭제") {
+                scope.launch { db.timetableDao().deleteAll() }
+            }
             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
             SettingsItem(Icons.Default.Notifications, "알림 설정", "준비 중") {}
         }
